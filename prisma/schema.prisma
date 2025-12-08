@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id
+  email         String         @unique
+  name          String?
+  avatar        String?
+  createdAt     DateTime       @default(now())
+  boardsOwned   Board[]        @relation("OwnerBoards")
+  memberships   BoardMember[]
+  comments      Comment[]
+  notifications Notification[]
+  taskAssigned  Task[]
+}
+
+model Board {
+  id         String          @id @default(cuid())
+  title      String
+  visibility BoardVisibility @default(PUBLIC)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  ownerId    String
+  owner      User            @relation("OwnerBoards", fields: [ownerId], references: [id])
+  members    BoardMember[]
+  lists      List[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  taskId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model List {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id])
+  tasks     Task[]
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  position    Int
+  listId      String
+  assigneeId  String
+  comments    Comment[]
+  assignee    User      @relation(fields: [assigneeId], references: [id])
+  list        List      @relation(fields: [listId], references: [id])
+}
+
+model BoardMember {
+  id      String          @id @default(cuid())
+  boardId String
+  role    BoardMemberRole @default(MEMBER)
+  userId  String
+  board   Board           @relation(fields: [boardId], references: [id])
+  user    User            @relation(fields: [userId], references: [id])
+
+  @@unique([boardId, userId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  createdAt DateTime         @default(now())
+  data      Json
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+enum BoardVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum BoardMemberRole {
+  ADMIN
+  MEMBER
+}
+
+enum NotificationType {
+  MENTION
+  COMMENT
+  INVITE
+  ASSIGN
+}

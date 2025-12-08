@@ -8,10 +8,21 @@ const isPublicRoute = createRouteMatcher([
     "/api/webhooks(.*)",
 ]);
 
+const isApiRoute = createRouteMatcher([
+    "/api(.*)"
+])
+
 export default clerkMiddleware(async (auth, req) => {
     const {userId} = await auth();
-    // console.log(userId ? userId : "not logged in");
     const url = new URL(req.url);
+
+    if (isApiRoute(req)) {
+        const internalSecret: string | null = req.headers.get('x-internal-secret');
+        if(internalSecret !== process.env.NEXT_PUBLIC_INTERNAL_SECRET ) {
+            return NextResponse.json({error: "Forbidden"}, {status: 403});
+        }
+        return NextResponse.next();
+    }
 
     if(userId && url.pathname === '/') {
         return NextResponse.redirect(new URL("/home", req.url));

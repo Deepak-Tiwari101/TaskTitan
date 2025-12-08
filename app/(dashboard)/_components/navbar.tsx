@@ -6,7 +6,7 @@ import {Button} from "@/components/ui/button";
 
 export const Navbar = () => {
     return (
-        <div className="fixed top-0 z-50 w-full h-14 bg-white/30 border-b shadow-md border-white/20 p-2 rounded-lg
+        <div className="sticky top-0 z-50 w-full h-14 bg-white/30 border-b shadow-md border-white/20 p-2 rounded-lg
                         flex items-center justify-between px-2">
             <Logo/>
             <div className="flex items-center gap-x-1 cursor-pointer">

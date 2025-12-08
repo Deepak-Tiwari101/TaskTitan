@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import TaskTitanLogo from "@/public/TaskTitanLogo.svg"
-import {AnimatedTitle} from "@/components/AnimatedTitle";
 
 export const Logo = () => {
     return (
